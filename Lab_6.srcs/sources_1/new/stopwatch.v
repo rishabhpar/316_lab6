@@ -10,7 +10,7 @@ module stopwatch(
                            // 6-9 for tens place; 
                            // 2-5 for ones places
     output [3:0] an,
-    output [6:0] display,
+    output [6:0] sseg,
     output decimalpoint
     );
     
@@ -29,7 +29,7 @@ wire logic_clk;
 wire display_clk;
 
 clk_div_disp c0 (.clk(clk), .reset(reset), .clk_out(display_clk)); 
-clockdiv_10ms c1 (.clk(clk), .reset(reset), .clk_out(slow_clk));
+clockdiv_10ms c1 (.clk(clk), .reset(reset), .clk_out(logic_clk));
 
 always @(posedge logic_clk) begin
     // toggle on start/stop presses 
@@ -48,7 +48,7 @@ always @(posedge logic_clk) begin
         running = 0; 
     end
  
-    // for mode 0 and 1, stay at 99.99
+    // for mode 1 and 2, stay at 99.99
     if (switches[1] == 0 && segment0_buf == 9 && segment1_buf == 9 && segment2_buf == 9 && segment3_buf == 9) begin 
         segment0_buf <= 9;
         segment1_buf <= 9;
@@ -57,7 +57,7 @@ always @(posedge logic_clk) begin
      end
 
 
-    // for mode 2 and 3, stay at 00.00
+    // for mode 3 and 4, stay at 00.00
     if (switches[1] == 1 && segment0_buf == 0 && segment1_buf == 0 && segment2_buf == 0 && segment3_buf == 0) begin 
         segment0_buf <= 0;
         segment1_buf <= 0;
@@ -151,7 +151,6 @@ always @(posedge logic_clk) begin
      end 
  end
         
-
 // update display buffers
 hexto7segment a1(.x(segment0_buf), .r(segment0)); 
 hexto7segment a2(.x(segment1_buf), .r(segment1));
@@ -167,8 +166,8 @@ state_machine c6(
     .in2(segment2),
     .in3(segment3),
     .an(an),
-    .sseg(display),
-    .dp(decimalpoint)
+    .sseg(sseg),
+    .decimalpoint(decimalpoint)
 );
 
 
